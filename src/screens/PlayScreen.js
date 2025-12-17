@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getRandomQuote } from '../data/quotes';
 
@@ -27,6 +27,14 @@ export default function PlayScreen() {
   const [streak, setStreak] = useState(0);
   const [score, setScore] = useState(0);
   const [roundsPlayed, setRoundsPlayed] = useState(0);
+
+  const progress = useMemo(() => Math.min(((roundsPlayed % 8) + 1) / 8, 1), [roundsPlayed]);
+
+  const sessionMood = useMemo(() => {
+    if (streak >= 4) return { label: 'Modo leyenda', color: '#22c55e', icon: 'ribbon' };
+    if (streak >= 2) return { label: 'Ritmo alto', color: '#fbbf24', icon: 'trending-up' };
+    return { label: 'Calentando', color: '#38bdf8', icon: 'sparkles' };
+  }, [streak]);
 
   const feedback = useMemo(() => {
     if (!selectedOption) return null;
@@ -73,9 +81,25 @@ export default function PlayScreen() {
             <Text style={styles.title}>Ronda relámpago</Text>
             <Text style={styles.subtitle}>Completa tantas frases como puedas.</Text>
           </View>
-          <View style={styles.badge}>
-            <Ionicons name="flame" size={16} color="#0b1224" />
-            <Text style={styles.badgeText}>{streak} racha</Text>
+          <View style={[styles.badge, { backgroundColor: sessionMood.color }]}>
+            <Ionicons name={sessionMood.icon} size={16} color={COLORS.card} />
+            <Text style={[styles.badgeText, { color: COLORS.card }]}>{sessionMood.label}</Text>
+          </View>
+        </View>
+
+        <View style={styles.banner}>
+          <View style={styles.bannerLeft}>
+            <Ionicons name="planet" size={18} color={COLORS.card} />
+            <View>
+              <Text style={styles.bannerTitle}>Desafío de galaxias</Text>
+              <Text style={styles.bannerSubtitle}>Frases viajeras con tres autores sorpresa.</Text>
+            </View>
+          </View>
+          <View style={styles.progressWrapper}>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+            </View>
+            <Text style={styles.progressLabel}>Próximo logro en {Math.max(1, Math.ceil((1 - progress) * 8))} frases</Text>
           </View>
         </View>
 
@@ -85,10 +109,33 @@ export default function PlayScreen() {
           <ScoreStat label="Racha" value={`${streak} seg.`} icon="sparkles" />
         </View>
 
+        <View style={styles.sessionGrid}>
+          <View style={styles.sessionCard}>
+            <Ionicons name="musical-notes" size={18} color={COLORS.card} />
+            <View style={styles.sessionCopy}>
+              <Text style={styles.sessionTitle}>Audio inmersivo</Text>
+              <Text style={styles.sessionSubtitle}>Sugerimos reproducir con auriculares para sentir la sala de lectura.</Text>
+            </View>
+          </View>
+          <View style={styles.sessionCard}>
+            <Ionicons name="sparkles" size={18} color={COLORS.card} />
+            <View style={styles.sessionCopy}>
+              <Text style={styles.sessionTitle}>Rondas temáticas</Text>
+              <Text style={styles.sessionSubtitle}>Cada 5 aciertos cambia la ambientación y la curaduría.</Text>
+            </View>
+          </View>
+        </View>
+
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardLabel}>Frase #{roundsPlayed + 1}</Text>
-            <Ionicons name="book" size={18} color={COLORS.accent} />
+            <View>
+              <Text style={styles.cardLabel}>Frase #{roundsPlayed + 1}</Text>
+              <Text style={styles.cardLegend}>Curaduría dinámica · Inspiración veloz</Text>
+            </View>
+            <Image
+              source={{ uri: 'https://images.unsplash.com/photo-1473186578172-c141e6798cf4?auto=format&fit=crop&w=200&q=80' }}
+              style={styles.cardImage}
+            />
           </View>
           <Text style={styles.quoteText}>“{round.quote.text}”</Text>
           <View style={styles.hintRow}>
@@ -97,10 +144,11 @@ export default function PlayScreen() {
           </View>
 
           <View style={styles.optionsList}>
-            {round.options.map((option) => {
+            {round.options.map((option, index) => {
               const isSelected = selectedOption === option;
               const isCorrect = option === round.quote.author;
               const disabled = Boolean(selectedOption);
+              const label = String.fromCharCode(65 + index);
 
               let optionStyle = styles.optionButton;
               if (selectedOption) {
@@ -117,11 +165,9 @@ export default function PlayScreen() {
                   activeOpacity={0.9}
                 >
                   <View style={styles.optionLeft}>
-                    <Ionicons
-                      name={isCorrect ? 'checkmark-circle' : 'ellipse-outline'}
-                      size={18}
-                      color={isCorrect ? '#16a34a' : COLORS.text}
-                    />
+                    <View style={[styles.optionBadge, { backgroundColor: isCorrect ? '#16a34a' : 'rgba(255,255,255,0.07)' }]}>
+                      <Text style={styles.optionBadgeText}>{label}</Text>
+                    </View>
                     <Text style={styles.optionText}>{option}</Text>
                   </View>
                   {isSelected ? <Ionicons name="radio-button-on" size={16} color={COLORS.accent} /> : null}
@@ -146,6 +192,15 @@ export default function PlayScreen() {
             <Ionicons name="refresh" size={16} color={COLORS.text} />
             <Text style={styles.resetText}>Reiniciar marcador</Text>
           </TouchableOpacity>
+          <View style={styles.tipCard}>
+            <View style={styles.tipIcon}>
+              <Ionicons name="compass" size={18} color={COLORS.card} />
+            </View>
+            <View style={styles.tipCopy}>
+              <Text style={styles.tipTitle}>Tip creativo</Text>
+              <Text style={styles.tipSubtitle}>Cambia de ritmo: alterna autores clásicos y modernos para subir de rango.</Text>
+            </View>
+          </View>
           <TouchableOpacity style={styles.textButton} onPress={handleNext}>
             <Text style={styles.textButtonLabel}>Quiero otra frase</Text>
           </TouchableOpacity>
@@ -204,9 +259,74 @@ const styles = StyleSheet.create({
     color: COLORS.card,
     fontWeight: '800',
   },
+  banner: {
+    backgroundColor: '#111827',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    gap: 10,
+  },
+  bannerLeft: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+  },
+  bannerTitle: {
+    color: '#f8fafc',
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  bannerSubtitle: {
+    color: COLORS.muted,
+  },
+  progressWrapper: {
+    gap: 6,
+  },
+  progressTrack: {
+    height: 8,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: COLORS.accent,
+  },
+  progressLabel: {
+    color: COLORS.muted,
+    fontSize: 12,
+  },
   scoreBoard: {
     flexDirection: 'row',
     gap: 10,
+  },
+  sessionGrid: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  sessionCard: {
+    flex: 1,
+    backgroundColor: '#111827',
+    borderRadius: 14,
+    padding: 12,
+    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  sessionCopy: {
+    gap: 4,
+    flex: 1,
+  },
+  sessionTitle: {
+    color: '#f8fafc',
+    fontWeight: '800',
+  },
+  sessionSubtitle: {
+    color: COLORS.muted,
+    fontSize: 12,
   },
   statBox: {
     flex: 1,
@@ -255,6 +375,15 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
+  cardLegend: {
+    color: COLORS.muted,
+    fontSize: 12,
+  },
+  cardImage: {
+    width: 56,
+    height: 56,
+    borderRadius: 14,
+  },
   quoteText: {
     color: '#f8fafc',
     fontSize: 20,
@@ -286,6 +415,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  optionBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionBadgeText: {
+    color: '#f8fafc',
+    fontWeight: '800',
   },
   optionText: {
     color: COLORS.text,
@@ -351,6 +491,37 @@ const styles = StyleSheet.create({
   resetText: {
     color: COLORS.text,
     fontWeight: '700',
+  },
+  tipCard: {
+    flexDirection: 'row',
+    gap: 10,
+    backgroundColor: '#111827',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    alignItems: 'center',
+  },
+  tipIcon: {
+    backgroundColor: COLORS.accent,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tipCopy: {
+    flex: 1,
+    gap: 4,
+  },
+  tipTitle: {
+    color: '#f8fafc',
+    fontWeight: '800',
+  },
+  tipSubtitle: {
+    color: COLORS.muted,
+    fontSize: 12,
+    lineHeight: 18,
   },
   textButton: {
     alignItems: 'center',
