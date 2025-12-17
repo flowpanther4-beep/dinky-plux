@@ -5,34 +5,32 @@ import ScreenLayout from '../components/ScreenLayout';
 
 const tips = [
   {
-    icon: '🔖',
-    title: 'Organiza con etiquetas',
-    description: 'Agrupa tus favoritos por tema para encontrarlos al instante.',
+    icon: '🎯',
+    title: 'Entrena con categorías',
+    description: 'Juega rondas solo de poesía, ciencia o literatura latinoamericana.',
   },
   {
-    icon: '⏰',
-    title: 'Recuerda revisarlos',
-    description: 'Activa recordatorios semanales para mantenerlos actualizados.',
+    icon: '⏱️',
+    title: 'Practica en 3 minutos',
+    description: 'Inicia un sprint corto con 5 frases para calentar la memoria.',
   },
   {
     icon: '🤝',
-    title: 'Comparte lo mejor',
-    description: 'Envía tus selecciones destacadas a tus contactos en un toque.',
+    title: 'Reta a tus amigos',
+    description: 'Comparte tu código de sala para competir por la mejor racha.',
   },
 ];
 
 export default function FavoritesScreen() {
   return (
     <ScreenLayout
-      title="Favoritos"
-      description="Guarda aquí lo que más usas y accede de forma organizada."
+      title="Colección"
+      description="Agrupa tus frases favoritas y crea playlists de autores."
     >
       <View style={styles.emptyState}>
-        <Text style={styles.emptyIcon}>📂</Text>
-        <Text style={styles.emptyTitle}>Aún no tienes favoritos</Text>
-        <Text style={styles.emptyDescription}>
-          Añade elementos desde cualquier pantalla para verlos agrupados aquí.
-        </Text>
+        <Text style={styles.emptyIcon}>📚</Text>
+        <Text style={styles.emptyTitle}>Aún no guardas frases</Text>
+        <Text style={styles.emptyDescription}>Curar tu biblioteca mejora tus sugerencias en las rondas.</Text>
       </View>
 
       <View style={styles.section}>

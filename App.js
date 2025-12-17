@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import HomeScreen from './src/screens/HomeScreen';
 import FavoritesScreen from './src/screens/FavoritesScreen';
+import PlayScreen from './src/screens/PlayScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
@@ -26,10 +27,12 @@ export default function App() {
             tabBarIcon: ({ focused, color, size }) => {
               let iconName = 'home';
 
-              if (route.name === 'Home') {
+              if (route.name === 'Inicio') {
                 iconName = focused ? 'home' : 'home-outline';
-              } else if (route.name === 'Favoritos') {
-                iconName = focused ? 'heart' : 'heart-outline';
+              } else if (route.name === 'Jugar') {
+                iconName = focused ? 'game-controller' : 'game-controller-outline';
+              } else if (route.name === 'Colección') {
+                iconName = focused ? 'book' : 'book-outline';
               } else if (route.name === 'Perfil') {
                 iconName = focused ? 'person' : 'person-outline';
               }
@@ -38,8 +41,9 @@ export default function App() {
             },
           })}
         >
-          <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Favoritos" component={FavoritesScreen} />
+          <Tab.Screen name="Inicio" component={HomeScreen} />
+          <Tab.Screen name="Jugar" component={PlayScreen} />
+          <Tab.Screen name="Colección" component={FavoritesScreen} />
           <Tab.Screen name="Perfil" component={ProfileScreen} />
         </Tab.Navigator>
       </NavigationContainer>

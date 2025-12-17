@@ -5,19 +5,19 @@ import ScreenLayout from '../components/ScreenLayout';
 
 const actions = [
   {
-    icon: '🛡️',
-    title: 'Seguridad',
-    description: 'Actualiza tu contraseña y revisa los dispositivos conectados.',
+    icon: '⚡',
+    title: 'Racha máxima',
+    description: 'Mantén vivo tu mejor récord jugando rondas diarias.',
   },
   {
-    icon: '⚙️',
-    title: 'Preferencias',
-    description: 'Configura notificaciones, idioma y accesibilidad.',
+    icon: '🧠',
+    title: 'Temas favoritos',
+    description: 'Personaliza qué autores y épocas quieres ver más seguido.',
   },
   {
-    icon: '🧾',
-    title: 'Historial',
-    description: 'Consulta tu actividad reciente y descargas realizadas.',
+    icon: '🏆',
+    title: 'Logros',
+    description: 'Desbloquea medallas por acertar citas difíciles y compartirlas.',
   },
 ];
 
@@ -25,14 +25,14 @@ export default function ProfileScreen() {
   return (
     <ScreenLayout
       title="Perfil"
-      description="Administra tu cuenta, preferencias y datos personales."
-      headerRight={<View style={styles.initialsBadge}><Text style={styles.initials}>AC</Text></View>}
+      description="Revisa tu progreso y ajusta el modo de juego a tu estilo."
+      headerRight={<View style={styles.initialsBadge}><Text style={styles.initials}>JG</Text></View>}
     >
       <View style={styles.summaryCard}>
-        <Text style={styles.summaryLabel}>Plan</Text>
-        <Text style={styles.summaryTitle}>Cuenta Pro</Text>
+        <Text style={styles.summaryLabel}>Puntaje semanal</Text>
+        <Text style={styles.summaryTitle}>780 pts</Text>
         <Text style={styles.summaryDescription}>
-          Accede a funciones avanzadas, soporte prioritario y sincronización ilimitada.
+          Sube 20 puestos más y desbloquea el reto "Frases del mundo" de fin de semana.
         </Text>
       </View>
 

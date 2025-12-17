@@ -1,217 +1,338 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import HomeHeader from '../components/HomeHeader';
-import TopStoryHero from '../components/TopStoryHero';
-import TrackerStatCard from '../components/TrackerStatCard';
-import PredictionsPanel from '../components/PredictionsPanel';
-import NewsRow from '../components/NewsRow';
-import { mockHome } from '../data/mockHome';
+import React, { useMemo, useState } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { quotes, getRandomQuote } from '../data/quotes';
 
-const ACCENT = '#f5c518';
+const gradientColors = ['#111827', '#0b1224'];
 
-export default function HomeScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  const [newsData, setNewsData] = useState([]);
-  const [simulateError] = useState(true);
+export default function HomeScreen({ navigation }) {
+  const [highlightId, setHighlightId] = useState(quotes[0].id);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (simulateError && attempt === 0) {
-        setError(true);
-        setLoading(false);
-        return;
-      }
+  const highlightQuote = useMemo(() => getRandomQuote(highlightId), [highlightId]);
 
-      setNewsData(mockHome.news);
-      setError(false);
-      setLoading(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [attempt, simulateError]);
-
-  const filteredNews = useMemo(() => {
-    if (!searchQuery) return newsData;
-    const query = searchQuery.toLowerCase();
-    return newsData.filter(
-      (item) =>
-        item.title.toLowerCase().includes(query) || item.category.toLowerCase().includes(query),
-    );
-  }, [newsData, searchQuery]);
-
-  const handleRetry = () => {
-    setError(false);
-    setLoading(true);
-    setAttempt((prev) => prev + 1);
+  const handleShuffle = () => {
+    setHighlightId(highlightQuote.id);
   };
 
-  const renderNewsSection = () => {
-    if (loading) {
-      return (
-        <View style={styles.stateCard}>
-          <ActivityIndicator color={ACCENT} />
-          <Text style={styles.stateText}>Actualizando briefing...</Text>
-        </View>
-      );
-    }
-
-    if (error) {
-      return (
-        <View style={styles.stateCard}>
-          <Text style={styles.stateTitle}>No pudimos cargar las noticias</Text>
-          <Text style={styles.stateText}>Revisa tu conexión y vuelve a intentar.</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
-            <Text style={styles.retryText}>Reintentar</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
-    if (!filteredNews.length) {
-      return (
-        <View style={styles.stateCard}>
-          <Text style={styles.stateTitle}>Sin resultados</Text>
-          <Text style={styles.stateText}>Ajusta tu búsqueda o revisa otras categorías.</Text>
-        </View>
-      );
-    }
-
-    return (
-      <View style={styles.newsList}>
-        {filteredNews.map((item) => (
-          <NewsRow key={item.id} item={item} />
-        ))}
-      </View>
-    );
+  const handlePlay = () => {
+    navigation.navigate('Jugar');
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <HomeHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <View style={styles.hero}>
+          <View style={styles.heroBadge}>
+            <Text style={styles.heroBadgeText}>Nuevo</Text>
+            <Text style={styles.heroBadgeLabel}>Juego de frases</Text>
+          </View>
+          <Text style={styles.heroTitle}>Adivina quién dijo la frase</Text>
+          <Text style={styles.heroSubtitle}>
+            Lee la cita, escoge entre tres voces y desbloquea rachas de conocimiento literario.
+          </Text>
+          <View style={styles.heroActions}>
+            <TouchableOpacity style={styles.primaryButton} onPress={handlePlay}>
+              <Text style={styles.primaryText}>Empezar partida</Text>
+              <Ionicons name="play" size={18} color="#0b1224" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.secondaryButton} onPress={handleShuffle}>
+              <Ionicons name="refresh" size={18} color="#e5e7eb" />
+              <Text style={styles.secondaryText}>Ver otra frase</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-        <TopStoryHero story={mockHome.topStory} />
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardLabel}>Destello de inspiración</Text>
+            <Ionicons name="bulb" size={18} color="#fbbf24" />
+          </View>
+          <Text style={styles.quoteText}>“{highlightQuote.text}”</Text>
+          <Text style={styles.quoteHint}>{highlightQuote.hint}</Text>
+          <View style={styles.metaRow}>
+            <View style={styles.metaPill}>
+              <Ionicons name="person" size={14} color="#0f172a" />
+              <Text style={styles.metaText}>{highlightQuote.author}</Text>
+            </View>
+            <TouchableOpacity style={styles.metaLink} onPress={handlePlay}>
+              <Text style={styles.metaLinkText}>Adivinar más</Text>
+              <Ionicons name="arrow-forward" size={14} color="#3b82f6" />
+            </TouchableOpacity>
+          </View>
+        </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Mandate Tracker</Text>
-          <View style={styles.trackerGrid}>
-            {mockHome.trackerStats.map((stat) => (
-              <TrackerStatCard key={stat.id} stat={stat} />
+          <Text style={styles.sectionTitle}>Cómo se juega</Text>
+          <View style={styles.stepsGrid}>
+            <StepCard
+              icon="chatbubble-ellipses"
+              title="Lee la frase"
+              description="Recibe citas icónicas con contexto mínimo."
+            />
+            <StepCard
+              icon="options"
+              title="Elige la voz"
+              description="Selecciona entre tres autores posibles."
+            />
+            <StepCard
+              icon="ribbon"
+              title="Gana la ronda"
+              description="Suma puntos, crea rachas y comparte tu marcador."
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Colecciones rápidas</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.deckRow}>
+            {['Autores latinoamericanos', 'Ciencia y cosmos', 'Frases inspiradoras', 'Poetas rebeldes'].map((label) => (
+              <View key={label} style={styles.deckCard}>
+                <Text style={styles.deckTitle}>{label}</Text>
+                <Text style={styles.deckSubtitle}>10 rondas curadas</Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Últimas puntuaciones</Text>
+          <View style={styles.scoreList}>
+            {[{ name: 'Ana', score: 180 }, { name: 'Luis', score: 150 }, { name: 'Camila', score: 140 }].map((item) => (
+              <View key={item.name} style={styles.scoreItem}>
+                <Text style={styles.scoreName}>{item.name}</Text>
+                <Text style={styles.scoreValue}>{item.score} pts</Text>
+              </View>
             ))}
           </View>
         </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Predicciones</Text>
-          <PredictionsPanel summary={mockHome.predictionsSummary} />
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Noticias rápidas</Text>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{filteredNews.length || newsData.length} ítems</Text>
-            </View>
-          </View>
-          {renderNewsSection()}
-        </View>
-
-        <Text style={styles.disclaimer}>Datos informativos. No constituye asesoría.</Text>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function StepCard({ icon, title, description }) {
+  return (
+    <View style={styles.stepCard}>
+      <View style={styles.stepIcon}>
+        <Ionicons name={icon} size={18} color="#0f172a" />
+      </View>
+      <Text style={styles.stepTitle}>{title}</Text>
+      <Text style={styles.stepDescription}>{description}</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#05060a',
+    backgroundColor: gradientColors[1],
   },
   scrollContent: {
-    paddingBottom: 32,
-    backgroundColor: '#05060a',
-    gap: 24,
+    padding: 20,
+    gap: 16,
+    backgroundColor: gradientColors[1],
   },
-  section: {
-    paddingHorizontal: 20,
+  hero: {
+    backgroundColor: '#0f172a',
+    borderRadius: 20,
+    padding: 20,
     gap: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
-  sectionHeader: {
+  heroBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#1f2937',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  heroBadgeText: {
+    color: '#9ca3af',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  heroBadgeLabel: {
+    color: '#e5e7eb',
+    fontSize: 13,
+  },
+  heroTitle: {
+    color: '#f9fafb',
+    fontSize: 28,
+    fontWeight: '800',
+    lineHeight: 32,
+  },
+  heroSubtitle: {
+    color: '#cbd5e1',
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  heroActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  primaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#fbbf24',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  primaryText: {
+    color: '#0b1224',
+    fontWeight: '800',
+    fontSize: 15,
+  },
+  secondaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  secondaryText: {
+    color: '#e5e7eb',
+    fontWeight: '700',
+  },
+  card: {
+    backgroundColor: '#0b1224',
+    borderRadius: 18,
+    padding: 18,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardLabel: {
+    color: '#cbd5e1',
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  quoteText: {
+    color: '#f8fafc',
+    fontSize: 18,
+    lineHeight: 26,
+    fontWeight: '700',
+  },
+  quoteHint: {
+    color: '#94a3b8',
+    lineHeight: 20,
+  },
+  metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  sectionTitle: {
-    color: '#f2f4f7',
-    fontSize: 18,
-    fontWeight: '900',
-  },
-  trackerGrid: {
+  metaPill: {
     flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#fbbf24',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  metaText: {
+    color: '#0f172a',
+    fontWeight: '800',
+  },
+  metaLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  metaLinkText: {
+    color: '#3b82f6',
+    fontWeight: '700',
+  },
+  section: {
     gap: 12,
+  },
+  sectionTitle: {
+    color: '#f8fafc',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  stepsGrid: {
+    flexDirection: 'row',
+    gap: 10,
     flexWrap: 'wrap',
   },
-  newsList: {
+  stepCard: {
+    flexBasis: '48%',
+    backgroundColor: '#0f172a',
+    borderRadius: 16,
+    padding: 14,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  stepIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#fbbf24',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepTitle: {
+    color: '#f8fafc',
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  stepDescription: {
+    color: '#cbd5e1',
+    lineHeight: 20,
+  },
+  deckRow: {
     gap: 10,
   },
-  stateCard: {
-    backgroundColor: '#0f1220',
+  deckCard: {
+    width: 200,
+    backgroundColor: '#111827',
     borderRadius: 16,
     padding: 16,
+    gap: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-    alignItems: 'center',
-    gap: 8,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
-  stateTitle: {
-    color: '#f2f4f7',
+  deckTitle: {
+    color: '#f8fafc',
+    fontWeight: '800',
     fontSize: 16,
+  },
+  deckSubtitle: {
+    color: '#94a3b8',
+  },
+  scoreList: {
+    backgroundColor: '#0f172a',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  scoreItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  scoreName: {
+    color: '#e5e7eb',
+    fontWeight: '700',
+  },
+  scoreValue: {
+    color: '#fbbf24',
     fontWeight: '800',
-    textAlign: 'center',
-  },
-  stateText: {
-    color: '#9aa3b9',
-    textAlign: 'center',
-  },
-  retryButton: {
-    marginTop: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 12,
-    backgroundColor: ACCENT,
-  },
-  retryText: {
-    color: '#2a1b00',
-    fontWeight: '800',
-  },
-  badge: {
-    backgroundColor: 'rgba(245,197,24,0.12)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  badgeText: {
-    color: ACCENT,
-    fontWeight: '800',
-    fontSize: 12,
-  },
-  disclaimer: {
-    color: '#6e7383',
-    fontSize: 12,
-    textAlign: 'center',
-    paddingHorizontal: 20,
   },
 });
