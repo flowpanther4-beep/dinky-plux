@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "dinky-plux",
+    "slug": "dinky-plux",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"]
+  }
+}
